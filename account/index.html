@@ -502,7 +502,7 @@
       $('apikey-display').textContent = apiKey;
       renderMcpSnippets(apiKey);
       showView('dash');
-      window.scrollTo(0, 0);
+      setTimeout(function() { window.scrollTo(0, 0); }, 50);
       var navLink = document.querySelector('.nav a[aria-current="page"]');
       if (navLink) navLink.textContent = 'Account';
       loadBillingStatus();
