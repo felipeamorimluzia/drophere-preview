@@ -354,7 +354,7 @@
   function ok(body){ return Promise.resolve(new Response(JSON.stringify(body),{status:200,headers:{'Content-Type':'application/json'}})); }
   function delay(ms,body){ return new Promise(function(res){setTimeout(function(){res(ok(body));},ms);}); }
   window.fetch = function(url,opts){
-    var u = (typeof url==='string'?url:(url&&(url as Request).url)||'');
+    var u = (typeof url==='string'?url:(url&&url.url)||'');
     if(u.includes('/api/auth/agent/request-code')) return delay(900,{ok:true});
     if(u.includes('/api/auth/agent/verify-code'))  return delay(900,{apiKey:FAKE_KEY});
     if(u.includes('/api/v1/artifacts')) return ok({artifacts:ARTIFACTS});
