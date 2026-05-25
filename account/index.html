@@ -424,7 +424,7 @@
                 <li>Unlimited persistent artifacts</li>
                 <li>Same API and MCP workflows</li>
               </ul>
-              <button type="button" class="btn-primary" id="billing-upgrade" data-billing-action="upgrade" data-plan="unlimited" style="margin-top:auto;">Upgrade to Unlimited</button>
+              <button type="button" class="btn-secondary" id="billing-upgrade" data-billing-action="upgrade" data-plan="unlimited" style="margin-top:auto;">Upgrade to Unlimited</button>
             </div>
             <div class="upgrade-box">
               <div class="upgrade-box-head">
@@ -508,6 +508,7 @@
 
     // ---- Dashboard tabs ----
     var KEY_TAB = 'drophere_tab';
+    var _tabReady = false;
     function showDashTab(name) {
       document.querySelectorAll('.dash-tab').forEach(function (t) {
         var active = t.dataset.dashTab === name;
@@ -521,6 +522,7 @@
     document.querySelectorAll('.dash-tab').forEach(function (btn) {
       btn.addEventListener('click', function () {
         var tab = btn.dataset.dashTab;
+        _tabReady = true;
         showDashTab(tab);
         localStorage.setItem(KEY_TAB, tab);
       });
@@ -636,6 +638,7 @@
       window.scrollTo(0, 0);
       showView('dash');
       document.querySelectorAll('[aria-current="page"]').forEach(function(el){el.textContent='Account';});
+      _tabReady = false;
       showDashTab(localStorage.getItem(KEY_TAB) || 'billing');
       loadBillingStatus();
       loadArtifacts();
@@ -797,9 +800,12 @@
       var manage = $('billing-manage');
       if (grid) grid.style.display = isPaid ? 'none' : '';
       if (manage) manage.style.display = isPaid ? '' : 'none';
-      if (isPaid && !localStorage.getItem(KEY_TAB)) {
-        showDashTab('artifacts');
-        localStorage.setItem(KEY_TAB, 'artifacts');
+      if (!_tabReady) {
+        _tabReady = true;
+        if (isPaid && (localStorage.getItem(KEY_TAB) || 'billing') === 'billing') {
+          showDashTab('artifacts');
+          localStorage.setItem(KEY_TAB, 'artifacts');
+        }
       }
     }
     function loadBillingStatus() {
