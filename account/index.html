@@ -142,12 +142,26 @@
     .btn-rotate { background:none; border:none; color:var(--error); padding:4px 0; font-size:.75rem; display:inline-flex; align-items:center; gap:5px; opacity:.7; }
     .btn-rotate:hover { opacity:1; text-decoration:underline; }
     .pill { display:inline-flex; align-items:center; min-height:22px; padding:2px 8px; border:1px solid var(--border); border-radius:999px; color:var(--muted); font-size:.6875rem; white-space:nowrap; }
-    .billing-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; margin-bottom:14px; }
-    .billing-metric { background:#050803; border:1px solid var(--border); border-radius:6px; padding:12px; min-width:0; }
-    .billing-metric .label { color:var(--dim); font-size:.6875rem; text-transform:uppercase; letter-spacing:.04em; margin-bottom:3px; }
-    .billing-metric .value { color:#fff; font-size:1rem; font-weight:600; overflow-wrap:anywhere; }
-    .billing-actions { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
-    .billing-actions .btn-primary, .billing-actions .btn-secondary { margin-left:0; }
+    .billing-current { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:8px; }
+    .billing-current-item { flex:1; min-width:110px; background:#050803; border:1px solid var(--border); border-radius:6px; padding:10px 12px; }
+    .billing-current-label { display:block; color:var(--dim); font-size:.6875rem; text-transform:uppercase; letter-spacing:.04em; margin-bottom:3px; }
+    .billing-current-value { display:block; color:#fff; font-size:.875rem; font-weight:600; overflow-wrap:anywhere; }
+    .billing-upsell { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; margin-top:20px; }
+    .upsell-card { border:1px solid var(--border); border-radius:8px; padding:20px; display:flex; flex-direction:column; }
+    .upsell-card.featured { border-color:rgba(206,255,145,.4); background:rgba(206,255,145,.03); }
+    .upsell-eyebrow { font-size:.6875rem; text-transform:uppercase; letter-spacing:.06em; color:var(--dim); margin-bottom:10px; }
+    .upsell-card.featured .upsell-eyebrow { color:var(--accent); }
+    .upsell-name { color:#fff; font-size:1.2rem; font-weight:650; margin-bottom:4px; }
+    .upsell-for { color:var(--dim); font-size:.8125rem; line-height:1.5; margin-bottom:14px; }
+    .upsell-price { color:#fff; font-size:1.75rem; font-weight:650; margin-bottom:16px; line-height:1; }
+    .upsell-price span { color:var(--muted); font-size:.875rem; font-weight:400; }
+    .upsell-features { list-style:none; display:flex; flex-direction:column; gap:9px; margin-bottom:20px; flex:1; }
+    .upsell-features li { display:grid; grid-template-columns:14px minmax(0,1fr); gap:8px; font-size:.8125rem; color:var(--muted); align-items:baseline; }
+    .upsell-features li::before { content:"→"; color:var(--accent); font-size:.75rem; }
+    .btn-upsell-primary { width:100%; padding:11px 16px; background:var(--accent); color:#020401; border:1px solid var(--accent); border-radius:6px; font-weight:650; font-size:.875rem; cursor:pointer; font-family:inherit; transition:opacity .15s; }
+    .btn-upsell-primary:hover { opacity:.88; }
+    .btn-upsell-secondary { width:100%; padding:11px 16px; background:transparent; color:#fff; border:1px solid var(--border); border-radius:6px; font-weight:500; font-size:.875rem; cursor:pointer; font-family:inherit; transition:border-color .15s; }
+    .btn-upsell-secondary:hover { border-color:var(--border-h); }
     .lock-note { border:1px solid var(--border); background:#050803; border-radius:6px; padding:10px 12px; color:var(--dim); font-size:.75rem; line-height:1.6; margin-bottom:14px; }
     .lock-note strong { color:#fff; font-weight:500; }
     .permissions-row td { padding:0 8px 12px; }
@@ -204,7 +218,7 @@
       tr.permissions-row td { padding:0; }
       tr.permissions-row td::before { display:none; }
       .permissions-grid { grid-template-columns:1fr; }
-      .billing-grid { grid-template-columns:1fr; }
+      .billing-upsell { grid-template-columns:1fr; }
     }
   </style>
 </head>
@@ -385,25 +399,51 @@
 
         <div class="card" id="billing">
           <h2>Billing</h2>
-          <div class="billing-grid" aria-label="Billing plan and quotas">
-            <div class="billing-metric">
-              <div class="label">Current plan</div>
-              <div class="value" id="billing-plan">Free Token</div>
+          <div class="billing-current" aria-label="Current plan">
+            <div class="billing-current-item">
+              <span class="billing-current-label">Current plan</span>
+              <span class="billing-current-value" id="billing-plan">Free Token</span>
             </div>
-            <div class="billing-metric">
-              <div class="label">Persistent artifacts</div>
-              <div class="value" id="billing-quota">-</div>
+            <div class="billing-current-item">
+              <span class="billing-current-label">Persistent artifacts</span>
+              <span class="billing-current-value" id="billing-quota">—</span>
             </div>
-            <div class="billing-metric">
-              <div class="label">Secure/Collab</div>
-              <div class="value" id="billing-secure">Locked</div>
+            <div class="billing-current-item">
+              <span class="billing-current-label">Secure/Collab</span>
+              <span class="billing-current-value" id="billing-secure">Locked</span>
             </div>
           </div>
-          <p class="helper" id="billing-helper" style="margin:0 0 14px;">Free Token includes MCP access, unlimited 24-hour artifacts, and 10 persistent artifacts.</p>
-          <div class="billing-actions">
-            <button type="button" class="btn-primary" id="billing-upgrade" data-billing-action="upgrade" data-plan="unlimited">Upgrade to Unlimited</button>
-            <button type="button" class="btn-secondary" id="billing-secure-upgrade" data-billing-action="upgrade" data-plan="secure">Upgrade to Secure</button>
-            <button type="button" class="btn-secondary" id="billing-manage" data-billing-action="manage">Manage billing</button>
+          <p class="helper" id="billing-helper">Free Token includes MCP access, unlimited 24-hour artifacts, and 10 persistent artifacts.</p>
+
+          <div class="billing-upsell">
+            <div class="upsell-card featured">
+              <p class="upsell-eyebrow">Best for volume</p>
+              <p class="upsell-name">Unlimited</p>
+              <p class="upsell-for">For high-volume persistent publishing without security controls.</p>
+              <p class="upsell-price">$4.99 <span>/ month</span></p>
+              <ul class="upsell-features">
+                <li>Unlimited persistent artifacts</li>
+                <li>Same API and MCP workflows</li>
+                <li>Upgrade through Stripe Checkout</li>
+              </ul>
+              <button type="button" class="btn-upsell-primary" id="billing-upgrade" data-billing-action="upgrade" data-plan="unlimited">Upgrade to Unlimited</button>
+            </div>
+            <div class="upsell-card">
+              <p class="upsell-eyebrow">Secure / Collab</p>
+              <p class="upsell-name">Secure</p>
+              <p class="upsell-for">For protected artifacts, customer demos, and review workflows.</p>
+              <p class="upsell-price">$9.99 <span>/ month</span></p>
+              <ul class="upsell-features">
+                <li>Access controls and password protection</li>
+                <li>Service variables and custom domains</li>
+                <li>Comments and collaborative review tools</li>
+              </ul>
+              <button type="button" class="btn-upsell-secondary" id="billing-secure-upgrade" data-billing-action="upgrade" data-plan="secure">Upgrade to Secure</button>
+            </div>
+          </div>
+
+          <div style="margin-top:16px;">
+            <button type="button" class="btn-link" id="billing-manage" data-billing-action="manage">Manage billing →</button>
           </div>
           <div class="status" id="billing-status" aria-live="polite"></div>
         </div>
