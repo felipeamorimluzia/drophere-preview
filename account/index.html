@@ -110,7 +110,7 @@
     .status.success { color: var(--accent); }
     .view { display: none; }
     .view.active { display: block; }
-    #view-email, #view-code { max-width: 480px; }
+    #view-email, #view-code { max-width: 100%; }
     .keybox { display:flex; align-items:center; gap:10px; background:#050803; border:1px solid var(--border); border-radius:6px; padding:10px 12px; }
     .keybox code { flex:1; font-size:.8125rem; color: var(--muted); overflow-x:auto; white-space:nowrap; }
     .copy-btn { background:none; border:none; color: var(--faint); cursor:pointer; padding:4px; border-radius:4px; flex-shrink:0; display:flex; align-items:center; justify-content:center; transition: color .15s; }
@@ -140,6 +140,8 @@
     .btn-secondary:hover { border-color: var(--link); }
     .btn-delete { background:none; border:1px solid var(--border); color: var(--error); padding:4px 10px; font-size:.75rem; border-radius:4px; margin-left:8px; }
     .btn-delete:hover { border-color: var(--error); }
+    .btn-rotate { background:none; border:none; color:var(--error); padding:4px 0; font-size:.75rem; display:inline-flex; align-items:center; gap:5px; opacity:.7; }
+    .btn-rotate:hover { opacity:1; text-decoration:underline; }
     .pill { display:inline-flex; align-items:center; min-height:22px; padding:2px 8px; border:1px solid var(--border); border-radius:999px; color:var(--muted); font-size:.6875rem; white-space:nowrap; }
     .billing-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; margin-bottom:14px; }
     .billing-metric { background:#050803; border:1px solid var(--border); border-radius:6px; padding:12px; min-width:0; }
@@ -279,7 +281,7 @@
           <p class="helper" style="margin:0;flex:1;">
             <strong>Leaked or compromised?</strong> Rotate the key — the old one will return 401 immediately. You'll get a confirmation email.
           </p>
-          <button type="button" class="btn-delete" id="apikey-rotate">rotate key</button>
+          <button type="button" class="btn-rotate" id="apikey-rotate" aria-label="Rotate API key"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg> rotate key</button>
         </div>
         <div class="status" id="rotate-status" aria-live="polite"></div>
       </div>
