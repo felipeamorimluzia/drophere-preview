@@ -146,7 +146,18 @@
     .billing-metric { background:#050803; border:1px solid var(--border); border-radius:6px; padding:12px; min-width:0; }
     .billing-metric .label { color:var(--dim); font-size:.6875rem; text-transform:uppercase; letter-spacing:.04em; margin-bottom:3px; }
     .billing-metric .value { color:#fff; font-size:1rem; font-weight:600; overflow-wrap:anywhere; }
-    .billing-actions { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+    .upgrade-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; margin-top:20px; }
+    .upgrade-box { border:1px solid var(--border); border-radius:8px; padding:16px 18px; display:flex; flex-direction:column; gap:10px; }
+    .upgrade-box.featured { border-color:rgba(206,255,145,.35); }
+    .upgrade-box-head { display:flex; align-items:baseline; justify-content:space-between; gap:8px; }
+    .upgrade-box-name { color:#fff; font-size:.9375rem; font-weight:650; }
+    .upgrade-box-price { color:var(--muted); font-size:.8125rem; }
+    .upgrade-box-price strong { color:#fff; font-weight:600; }
+    .upgrade-box-desc { color:var(--dim); font-size:.8125rem; line-height:1.5; }
+    .upgrade-box-features { list-style:none; display:flex; flex-direction:column; gap:7px; }
+    .upgrade-box-features li { display:grid; grid-template-columns:12px minmax(0,1fr); gap:7px; font-size:.8125rem; color:var(--muted); align-items:baseline; }
+    .upgrade-box-features li::before { content:"→"; color:var(--accent); font-size:.7rem; }
+    .billing-actions { display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-top:16px; }
     .billing-actions .btn-primary, .billing-actions .btn-secondary { margin-left:0; }
     .lock-note { border:1px solid var(--border); background:#050803; border-radius:6px; padding:10px 12px; color:var(--dim); font-size:.75rem; line-height:1.6; margin-bottom:14px; }
     .lock-note strong { color:#fff; font-weight:500; }
@@ -205,6 +216,7 @@
       tr.permissions-row td::before { display:none; }
       .permissions-grid { grid-template-columns:1fr; }
       .billing-grid { grid-template-columns:1fr; }
+      .upgrade-grid { grid-template-columns:1fr; }
     }
   </style>
 </head>
@@ -399,11 +411,38 @@
               <div class="value" id="billing-secure">Locked</div>
             </div>
           </div>
-          <p class="helper" id="billing-helper" style="margin:0 0 14px;">Free Token includes MCP access, unlimited 24-hour artifacts, and 10 persistent artifacts.</p>
+          <p class="helper" id="billing-helper">Free Token includes MCP access, unlimited 24-hour artifacts, and 10 persistent artifacts.</p>
+
+          <div class="upgrade-grid" id="upgrade-grid">
+            <div class="upgrade-box featured">
+              <div class="upgrade-box-head">
+                <span class="upgrade-box-name">Unlimited</span>
+                <span class="upgrade-box-price"><strong>$4.99</strong> / mo</span>
+              </div>
+              <p class="upgrade-box-desc">Remove the 10-artifact cap. Publish as much as you want, for as long as you want.</p>
+              <ul class="upgrade-box-features">
+                <li>Unlimited persistent artifacts</li>
+                <li>Same API and MCP workflows</li>
+              </ul>
+              <button type="button" class="btn-primary" id="billing-upgrade" data-billing-action="upgrade" data-plan="unlimited" style="margin-top:auto;">Upgrade to Unlimited</button>
+            </div>
+            <div class="upgrade-box">
+              <div class="upgrade-box-head">
+                <span class="upgrade-box-name">Secure</span>
+                <span class="upgrade-box-price"><strong>$9.99</strong> / mo</span>
+              </div>
+              <p class="upgrade-box-desc">Lock down who can see your artifacts. Built for client demos and private review.</p>
+              <ul class="upgrade-box-features">
+                <li>Password protection and access controls</li>
+                <li>Custom domains and service variables</li>
+                <li>Comments and collaborative review</li>
+              </ul>
+              <button type="button" class="btn-secondary" id="billing-secure-upgrade" data-billing-action="upgrade" data-plan="secure" style="margin-top:auto;">Upgrade to Secure</button>
+            </div>
+          </div>
+
           <div class="billing-actions">
-            <button type="button" class="btn-primary" id="billing-upgrade" data-billing-action="upgrade" data-plan="unlimited">Upgrade to Unlimited</button>
-            <button type="button" class="btn-secondary" id="billing-secure-upgrade" data-billing-action="upgrade" data-plan="secure">Upgrade to Secure</button>
-            <button type="button" class="btn-secondary" id="billing-manage" data-billing-action="manage">Manage billing</button>
+            <button type="button" class="btn-secondary" id="billing-manage" data-billing-action="manage" style="display:none;">Manage billing</button>
           </div>
           <div class="status" id="billing-status" aria-live="polite"></div>
         </div>
@@ -597,7 +636,7 @@
       window.scrollTo(0, 0);
       showView('dash');
       document.querySelectorAll('[aria-current="page"]').forEach(function(el){el.textContent='Account';});
-      showDashTab(localStorage.getItem(KEY_TAB) || 'setup');
+      showDashTab(localStorage.getItem(KEY_TAB) || 'billing');
       loadBillingStatus();
       loadArtifacts();
     }
@@ -743,7 +782,9 @@
     }
     function renderBillingStatus(data) {
       if (!data) return;
-      $('billing-plan').textContent = planLabel(data.plan);
+      var plan = data.plan || 'free';
+      var isPaid = plan === 'unlimited' || plan === 'secure';
+      $('billing-plan').textContent = planLabel(plan);
       var usage = data.usage || {};
       $('billing-quota').textContent = usage.persistentArtifactLimit == null
         ? String(usage.persistentArtifacts || 0) + ' / unlimited'
@@ -752,6 +793,14 @@
       $('billing-helper').textContent = data.features && data.features.secureAccessControls
         ? 'Secure/Collab is active. Access control, passwords, service variables, custom domains, and collaboration tools are unlocked.'
         : 'Free Token includes MCP access, unlimited 24-hour artifacts, and 10 persistent artifacts. Secure/Collab unlocks private review workflows.';
+      var grid = $('upgrade-grid');
+      var manage = $('billing-manage');
+      if (grid) grid.style.display = isPaid ? 'none' : '';
+      if (manage) manage.style.display = isPaid ? '' : 'none';
+      if (isPaid && !localStorage.getItem(KEY_TAB)) {
+        showDashTab('artifacts');
+        localStorage.setItem(KEY_TAB, 'artifacts');
+      }
     }
     function loadBillingStatus() {
       return authedFetch('/api/v1/billing/status')
