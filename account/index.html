@@ -50,7 +50,8 @@
       --accent:var(--dh-lime); --link:#bfffa8; --error:#f87171;
       --warn-bg:#2a2410; --warn-bd:#5c4a14; --warn-fg:#facc15;
     }
-    html { background: var(--bg); scrollbar-gutter: stable; }
+    html { background: var(--bg); }
+    html.is-dash { scrollbar-gutter: stable; }
     body {
       background: #000; color: var(--text); min-height: 100vh; padding: 0;
       font-family: var(--dh-font-sans);
@@ -515,6 +516,7 @@
 
     // ---- View switching ----
     function showView(name) {
+      document.documentElement.classList.toggle('is-dash', name === 'dash');
       var ids = { email:'view-email', code:'view-code', dash:'view-dash' };
       Object.keys(ids).forEach(function (k) {
         var el = $(ids[k]); if (el) el.classList.toggle('active', k === name);
