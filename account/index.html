@@ -50,7 +50,7 @@
       --accent:var(--dh-lime); --link:#bfffa8; --error:#f87171;
       --warn-bg:#2a2410; --warn-bd:#5c4a14; --warn-fg:#facc15;
     }
-    html { background: var(--bg); }
+    html { background: var(--bg); scrollbar-gutter: stable; }
     body {
       background: #000; color: var(--text); min-height: 100vh; padding: 0;
       font-family: var(--dh-font-sans);
@@ -61,9 +61,8 @@
     a:hover { text-decoration: underline; }
     .arrow-field { position: fixed; inset: 0; z-index: 0; width: 100%; height: 100%; pointer-events: none; }
     @media (prefers-reduced-motion: reduce) { .arrow-field { display: none; } }
-    .container { max-width: 1180px; margin: 0 auto; padding: 0 24px 40px; position: relative; z-index: 1; flex: 1; display: flex; flex-direction: column; justify-content: center; }
-    .container.is-dash { justify-content: flex-start; padding-top: 40px; }
-    .page-header { display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; width: min(1180px, calc(100% - 48px)); margin: 0 auto; padding: 28px 0 32px; position: relative; z-index: 1; }
+    .container { max-width: 1180px; width: 100%; margin: 0 auto; padding: 0 24px 40px; position: relative; z-index: 1; flex: 1; display: flex; flex-direction: column; }
+    .page-header { display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; max-width: 1180px; width: 100%; margin: 0 auto; padding: 28px 24px 32px; position: relative; z-index: 1; }
     .brand { display:inline-flex; align-items:center; gap:10px; color:#fff; text-decoration:none; font-size:1rem; font-weight:650; }
     .brand img { width:34px; height:24px; object-fit:contain; }
     .brand span { font-size: 1rem; font-weight: 650; color:#fff; letter-spacing:0; }
@@ -110,7 +109,7 @@
     .status.success { color: var(--accent); }
     .view { display: none; }
     .view.active { display: block; }
-    #view-email, #view-code { max-width: 100%; }
+    #view-email.active, #view-code.active { display: flex; align-items: center; flex: 1; }
     .keybox { display:flex; align-items:center; gap:10px; background:#050803; border:1px solid var(--border); border-radius:6px; padding:10px 12px; }
     .keybox code { flex:1; font-size:.8125rem; color: var(--muted); overflow-x:auto; white-space:nowrap; }
     .copy-btn { background:none; border:none; color: var(--faint); cursor:pointer; padding:4px; border-radius:4px; flex-shrink:0; display:flex; align-items:center; justify-content:center; transition: color .15s; }
@@ -273,6 +272,7 @@
       <div class="dash-tabs" role="tablist">
         <button type="button" class="dash-tab" role="tab" aria-selected="false" data-dash-tab="setup" id="dtab-setup" aria-controls="dpanel-setup">Setup</button>
         <button type="button" class="dash-tab" role="tab" aria-selected="false" data-dash-tab="artifacts" id="dtab-artifacts" aria-controls="dpanel-artifacts">Artifacts</button>
+        <button type="button" class="dash-tab" role="tab" aria-selected="false" data-dash-tab="billing" id="dtab-billing" aria-controls="dpanel-billing">Billing</button>
       </div>
 
       <div id="dpanel-setup" class="dash-panel" role="tabpanel" aria-labelledby="dtab-setup">
@@ -333,26 +333,6 @@
           </div>
         </div>
 
-        <div class="card">
-          <h2>Claim an artifact</h2>
-          <p class="helper" style="margin:0 0 14px;">Got a slug + claim token from a guest upload?</p>
-          <form id="claim-form" novalidate>
-            <div class="field">
-              <label for="claim-slug">Slug</label>
-              <input type="text" id="claim-slug" name="slug" autocomplete="off" required>
-            </div>
-            <div class="field">
-              <label for="claim-token">Claim token</label>
-              <input type="text" id="claim-token" name="claimToken" autocomplete="off" required>
-            </div>
-            <div class="btn-row">
-              <button type="submit" class="btn-primary" id="claim-submit">Claim</button>
-            </div>
-            <div class="status" id="claim-status" aria-live="polite"></div>
-          </form>
-          <p class="helper">Lost your claim token? It cannot be recovered — contact support.</p>
-        </div>
-
       </div><!-- /dpanel-setup -->
 
       <div id="dpanel-artifacts" class="dash-panel" role="tabpanel" aria-labelledby="dtab-artifacts">
@@ -379,6 +359,30 @@
           <div class="status" id="artifacts-status" aria-live="polite"></div>
         </div>
 
+        <div class="card">
+          <h2>Claim an artifact</h2>
+          <p class="helper" style="margin:0 0 14px;">Got a slug + claim token from a guest upload?</p>
+          <form id="claim-form" novalidate>
+            <div class="field">
+              <label for="claim-slug">Slug</label>
+              <input type="text" id="claim-slug" name="slug" autocomplete="off" required>
+            </div>
+            <div class="field">
+              <label for="claim-token">Claim token</label>
+              <input type="text" id="claim-token" name="claimToken" autocomplete="off" required>
+            </div>
+            <div class="btn-row">
+              <button type="submit" class="btn-primary" id="claim-submit">Claim</button>
+            </div>
+            <div class="status" id="claim-status" aria-live="polite"></div>
+          </form>
+          <p class="helper">Lost your claim token? It cannot be recovered — contact support.</p>
+        </div>
+
+      </div><!-- /dpanel-artifacts -->
+
+      <div id="dpanel-billing" class="dash-panel" role="tabpanel" aria-labelledby="dtab-billing">
+
         <div class="card" id="billing">
           <h2>Billing</h2>
           <div class="billing-grid" aria-label="Billing plan and quotas">
@@ -404,7 +408,7 @@
           <div class="status" id="billing-status" aria-live="polite"></div>
         </div>
 
-      </div><!-- /dpanel-artifacts -->
+      </div><!-- /dpanel-billing -->
     </section>
   </div>
 
@@ -454,8 +458,6 @@
       Object.keys(ids).forEach(function (k) {
         var el = $(ids[k]); if (el) el.classList.toggle('active', k === name);
       });
-      var cont = document.querySelector('.container');
-      if (cont) cont.classList.toggle('is-dash', name === 'dash');
       if (name !== 'dash') {
         setTimeout(function () {
           var view = $(ids[name]); if (!view) return;
@@ -479,8 +481,9 @@
     }
     document.querySelectorAll('.dash-tab').forEach(function (btn) {
       btn.addEventListener('click', function () {
-        showDashTab(btn.dataset.dashTab);
-        localStorage.setItem(KEY_TAB, btn.dataset.dashTab);
+        var tab = btn.dataset.dashTab;
+        showDashTab(tab);
+        localStorage.setItem(KEY_TAB, tab);
       });
     });
 
