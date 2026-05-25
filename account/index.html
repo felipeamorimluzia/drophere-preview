@@ -175,12 +175,13 @@
     .toast.error { border-color: var(--error); }
     .signed-in { display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; font-size:.75rem; color: var(--dim); margin-bottom: 20px; }
     .signed-in .email { color: var(--muted); }
-    .card-collapsible .card-body { display: none; }
-    .card-collapsible.expanded .card-body { display: block; }
-    .card-toggle { display:flex; align-items:center; justify-content:space-between; cursor:pointer; user-select:none; }
-    .card-toggle h2 { margin-bottom: 0; }
-    .card-toggle-arrow { font-size:.75rem; color:var(--dim); transition:transform .2s; flex-shrink:0; }
-    .card-collapsible.expanded .card-toggle-arrow { transform: rotate(180deg); }
+    .dash-tabs { display:flex; border-bottom:1px solid var(--border); margin-bottom:24px; }
+    .dash-tab { background:transparent; border:none; border-bottom:3px solid transparent; padding:10px 18px; font-size:.875rem; font-weight:500; color:var(--dim); font-family:inherit; cursor:pointer; margin-bottom:-1px; transition:color .15s; }
+    .dash-tab:hover { color:var(--muted); }
+    .dash-tab.active { color:#fff; border-bottom-color:var(--accent); }
+    .dash-tab:focus-visible { outline:2px solid var(--link); outline-offset:-2px; }
+    .dash-panel { display:none; }
+    .dash-panel.active { display:block; }
     @media (max-width: 640px) {
       .nav { display:none; }
       .menu-toggle { display:flex; align-items:center; justify-content:center; }
@@ -269,142 +270,141 @@
         <button type="button" class="btn-link" id="logout-btn">logout</button>
       </div>
 
-      <div class="card">
-        <h2>Your API key</h2>
-        <div class="keybox" id="apikey-box">
-          <code id="apikey-display"></code>
-          <button type="button" class="copy-btn" id="apikey-copy" aria-label="Copy API key"></button>
-        </div>
-        <p class="helper">Save this in your password manager. You can always recover it by re-verifying with this email.</p>
-        <div class="status" id="copy-announce" aria-live="polite"></div>
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:12px;gap:12px;flex-wrap:wrap;">
-          <p class="helper" style="margin:0;flex:1;">
-            <strong>Leaked or compromised?</strong> Rotate the key — the old one will return 401 immediately. You'll get a confirmation email.
-          </p>
-          <button type="button" class="btn-rotate" id="apikey-rotate" aria-label="Rotate API key"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg> rotate key</button>
-        </div>
-        <div class="status" id="rotate-status" aria-live="polite"></div>
+      <div class="dash-tabs" role="tablist">
+        <button type="button" class="dash-tab" role="tab" aria-selected="false" data-dash-tab="setup" id="dtab-setup" aria-controls="dpanel-setup">Setup</button>
+        <button type="button" class="dash-tab" role="tab" aria-selected="false" data-dash-tab="artifacts" id="dtab-artifacts" aria-controls="dpanel-artifacts">Artifacts</button>
       </div>
 
-      <div class="card" id="billing">
-        <h2>Billing</h2>
-        <div class="billing-grid" aria-label="Billing plan and quotas">
-          <div class="billing-metric">
-            <div class="label">Current plan</div>
-            <div class="value" id="billing-plan">Free Token</div>
-          </div>
-          <div class="billing-metric">
-            <div class="label">Persistent artifacts</div>
-            <div class="value" id="billing-quota">-</div>
-          </div>
-          <div class="billing-metric">
-            <div class="label">Secure/Collab</div>
-            <div class="value" id="billing-secure">Locked</div>
-          </div>
-        </div>
-        <p class="helper" id="billing-helper" style="margin:0 0 14px;">Free Token includes MCP access, unlimited 24-hour artifacts, and 10 persistent artifacts.</p>
-        <div class="billing-actions">
-          <button type="button" class="btn-primary" id="billing-upgrade" data-billing-action="upgrade" data-plan="unlimited">Upgrade to Unlimited</button>
-          <button type="button" class="btn-secondary" id="billing-secure-upgrade" data-billing-action="upgrade" data-plan="secure">Upgrade to Secure</button>
-          <button type="button" class="btn-secondary" id="billing-manage" data-billing-action="manage">Manage billing</button>
-        </div>
-        <div class="status" id="billing-status" aria-live="polite"></div>
-      </div>
+      <div id="dpanel-setup" class="dash-panel" role="tabpanel" aria-labelledby="dtab-setup">
 
-      <div class="card card-collapsible" id="card-mcp">
-        <div class="card-toggle" role="button" tabindex="0" aria-expanded="false" aria-controls="body-mcp">
+        <div class="card">
+          <h2>Your API key</h2>
+          <div class="keybox" id="apikey-box">
+            <code id="apikey-display"></code>
+            <button type="button" class="copy-btn" id="apikey-copy" aria-label="Copy API key"></button>
+          </div>
+          <p class="helper">Save this in your password manager. You can always recover it by re-verifying with this email.</p>
+          <div class="status" id="copy-announce" aria-live="polite"></div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-top:12px;gap:12px;flex-wrap:wrap;">
+            <p class="helper" style="margin:0;flex:1;">
+              <strong>Leaked or compromised?</strong> Rotate the key — the old one will return 401 immediately. You'll get a confirmation email.
+            </p>
+            <button type="button" class="btn-rotate" id="apikey-rotate" aria-label="Rotate API key"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg> rotate key</button>
+          </div>
+          <div class="status" id="rotate-status" aria-live="polite"></div>
+        </div>
+
+        <div class="card">
           <h2>MCP setup</h2>
-          <span class="card-toggle-arrow" aria-hidden="true">▼</span>
-        </div>
-        <div class="card-body" id="body-mcp">
-        <div class="mcp-tabs" role="tablist" id="mcp-tablist">
-          <button type="button" class="mcp-tab active" role="tab" aria-selected="true" data-tab="claude">Claude Desktop</button>
-          <button type="button" class="mcp-tab" role="tab" aria-selected="false" data-tab="chatgpt">ChatGPT</button>
-          <button type="button" class="mcp-tab" role="tab" aria-selected="false" data-tab="cursor">Cursor</button>
-          <button type="button" class="mcp-tab" role="tab" aria-selected="false" data-tab="inspector">Inspector</button>
-        </div>
-
-        <div class="mcp-panel active" data-panel="claude" role="tabpanel">
-          <div class="pre-wrap">
-            <pre id="mcp-claude-pre"></pre>
-            <button type="button" class="copy-btn" data-copy-target="mcp-claude-pre" aria-label="Copy Claude Desktop config"></button>
+          <div class="mcp-tabs" role="tablist" id="mcp-tablist">
+            <button type="button" class="mcp-tab active" role="tab" aria-selected="true" data-tab="claude">Claude Desktop</button>
+            <button type="button" class="mcp-tab" role="tab" aria-selected="false" data-tab="chatgpt">ChatGPT</button>
+            <button type="button" class="mcp-tab" role="tab" aria-selected="false" data-tab="cursor">Cursor</button>
+            <button type="button" class="mcp-tab" role="tab" aria-selected="false" data-tab="inspector">Inspector</button>
           </div>
-          <p class="helper">Save to your Claude Desktop config (e.g. <code>~/Library/Application Support/Claude/claude_desktop_config.json</code> on macOS).</p>
-        </div>
-
-        <div class="mcp-panel" data-panel="chatgpt" role="tabpanel">
-          <div class="warn-banner" role="note">⚠ This URL contains your API key. Treat it like a password — it will appear in browser history and any page that opens it. Don't share or screenshot.</div>
-          <div class="pre-wrap">
-            <pre id="mcp-chatgpt-pre"></pre>
-            <button type="button" class="copy-btn" data-copy-target="mcp-chatgpt-pre" aria-label="Copy ChatGPT URL"></button>
+          <div class="mcp-panel active" data-panel="claude" role="tabpanel">
+            <div class="pre-wrap">
+              <pre id="mcp-claude-pre"></pre>
+              <button type="button" class="copy-btn" data-copy-target="mcp-claude-pre" aria-label="Copy Claude Desktop config"></button>
+            </div>
+            <p class="helper">Save to your Claude Desktop config (e.g. <code>~/Library/Application Support/Claude/claude_desktop_config.json</code> on macOS).</p>
           </div>
-          <p class="helper">Paste into ChatGPT developer mode as a custom MCP server URL.</p>
-        </div>
-
-        <div class="mcp-panel" data-panel="cursor" role="tabpanel">
-          <div class="pre-wrap">
-            <pre id="mcp-cursor-pre"></pre>
-            <button type="button" class="copy-btn" data-copy-target="mcp-cursor-pre" aria-label="Copy Cursor config"></button>
+          <div class="mcp-panel" data-panel="chatgpt" role="tabpanel">
+            <div class="warn-banner" role="note">⚠ This URL contains your API key. Treat it like a password — it will appear in browser history and any page that opens it. Don't share or screenshot.</div>
+            <div class="pre-wrap">
+              <pre id="mcp-chatgpt-pre"></pre>
+              <button type="button" class="copy-btn" data-copy-target="mcp-chatgpt-pre" aria-label="Copy ChatGPT URL"></button>
+            </div>
+            <p class="helper">Paste into ChatGPT developer mode as a custom MCP server URL.</p>
           </div>
-          <p class="helper">Save to <code>~/.cursor/mcp.json</code>.</p>
-        </div>
-
-        <div class="mcp-panel" data-panel="inspector" role="tabpanel">
-          <div class="pre-wrap">
-            <pre id="mcp-inspector-pre"></pre>
-            <button type="button" class="copy-btn" data-copy-target="mcp-inspector-pre" aria-label="Copy Inspector command"></button>
+          <div class="mcp-panel" data-panel="cursor" role="tabpanel">
+            <div class="pre-wrap">
+              <pre id="mcp-cursor-pre"></pre>
+              <button type="button" class="copy-btn" data-copy-target="mcp-cursor-pre" aria-label="Copy Cursor config"></button>
+            </div>
+            <p class="helper">Save to <code>~/.cursor/mcp.json</code>.</p>
           </div>
-          <p class="helper">Then choose Streamable HTTP transport, point at the URL above, and add the Authorization header.</p>
+          <div class="mcp-panel" data-panel="inspector" role="tabpanel">
+            <div class="pre-wrap">
+              <pre id="mcp-inspector-pre"></pre>
+              <button type="button" class="copy-btn" data-copy-target="mcp-inspector-pre" aria-label="Copy Inspector command"></button>
+            </div>
+            <p class="helper">Then choose Streamable HTTP transport, point at the URL above, and add the Authorization header.</p>
+          </div>
         </div>
-        </div><!-- /card-body#body-mcp -->
-      </div>
 
-      <div class="card card-collapsible" id="card-claim">
-        <div class="card-toggle" role="button" tabindex="0" aria-expanded="false" aria-controls="body-claim">
+        <div class="card">
           <h2>Claim an artifact</h2>
-          <span class="card-toggle-arrow" aria-hidden="true">▼</span>
+          <p class="helper" style="margin:0 0 14px;">Got a slug + claim token from a guest upload?</p>
+          <form id="claim-form" novalidate>
+            <div class="field">
+              <label for="claim-slug">Slug</label>
+              <input type="text" id="claim-slug" name="slug" autocomplete="off" required>
+            </div>
+            <div class="field">
+              <label for="claim-token">Claim token</label>
+              <input type="text" id="claim-token" name="claimToken" autocomplete="off" required>
+            </div>
+            <div class="btn-row">
+              <button type="submit" class="btn-primary" id="claim-submit">Claim</button>
+            </div>
+            <div class="status" id="claim-status" aria-live="polite"></div>
+          </form>
+          <p class="helper">Lost your claim token? It cannot be recovered — contact support.</p>
         </div>
-        <div class="card-body" id="body-claim">
-        <p class="helper" style="margin:0 0 14px;">Got a slug + claim token from a guest upload?</p>
-        <form id="claim-form" novalidate>
-          <div class="field">
-            <label for="claim-slug">Slug</label>
-            <input type="text" id="claim-slug" name="slug" autocomplete="off" required>
-          </div>
-          <div class="field">
-            <label for="claim-token">Claim token</label>
-            <input type="text" id="claim-token" name="claimToken" autocomplete="off" required>
-          </div>
-          <div class="btn-row">
-            <button type="submit" class="btn-primary" id="claim-submit">Claim</button>
-          </div>
-          <div class="status" id="claim-status" aria-live="polite"></div>
-        </form>
-        <p class="helper">Lost your claim token? It cannot be recovered — contact support.</p>
-        </div><!-- /card-body#body-claim -->
-      </div>
 
-      <div class="card">
-        <h2 id="artifacts-heading">Your artifacts (0)</h2>
-        <input
-          id="artifacts-search"
-          type="search"
-          placeholder="Search by title or slug…"
-          autocomplete="off"
-          spellcheck="false"
-          aria-label="Search artifacts"
-          style="margin-bottom:12px;display:none;"
-        />
-        <div id="artifacts-loading" class="empty">Loading…</div>
-        <div id="artifacts-empty" class="empty" style="display:none;"></div>
-        <div id="artifacts-table-wrap" style="display:none;">
-          <table>
-            <thead><tr><th>title</th><th>slug</th><th>status</th><th>view</th><th>comments</th><th>expires</th><th></th></tr></thead>
-            <tbody id="artifacts-tbody"></tbody>
-          </table>
+      </div><!-- /dpanel-setup -->
+
+      <div id="dpanel-artifacts" class="dash-panel" role="tabpanel" aria-labelledby="dtab-artifacts">
+
+        <div class="card">
+          <h2 id="artifacts-heading">Your artifacts (0)</h2>
+          <input
+            id="artifacts-search"
+            type="search"
+            placeholder="Search by title or slug…"
+            autocomplete="off"
+            spellcheck="false"
+            aria-label="Search artifacts"
+            style="margin-bottom:12px;display:none;"
+          />
+          <div id="artifacts-loading" class="empty">Loading…</div>
+          <div id="artifacts-empty" class="empty" style="display:none;"></div>
+          <div id="artifacts-table-wrap" style="display:none;">
+            <table>
+              <thead><tr><th>title</th><th>slug</th><th>status</th><th>view</th><th>comments</th><th>expires</th><th></th></tr></thead>
+              <tbody id="artifacts-tbody"></tbody>
+            </table>
+          </div>
+          <div class="status" id="artifacts-status" aria-live="polite"></div>
         </div>
-        <div class="status" id="artifacts-status" aria-live="polite"></div>
-      </div>
+
+        <div class="card" id="billing">
+          <h2>Billing</h2>
+          <div class="billing-grid" aria-label="Billing plan and quotas">
+            <div class="billing-metric">
+              <div class="label">Current plan</div>
+              <div class="value" id="billing-plan">Free Token</div>
+            </div>
+            <div class="billing-metric">
+              <div class="label">Persistent artifacts</div>
+              <div class="value" id="billing-quota">-</div>
+            </div>
+            <div class="billing-metric">
+              <div class="label">Secure/Collab</div>
+              <div class="value" id="billing-secure">Locked</div>
+            </div>
+          </div>
+          <p class="helper" id="billing-helper" style="margin:0 0 14px;">Free Token includes MCP access, unlimited 24-hour artifacts, and 10 persistent artifacts.</p>
+          <div class="billing-actions">
+            <button type="button" class="btn-primary" id="billing-upgrade" data-billing-action="upgrade" data-plan="unlimited">Upgrade to Unlimited</button>
+            <button type="button" class="btn-secondary" id="billing-secure-upgrade" data-billing-action="upgrade" data-plan="secure">Upgrade to Secure</button>
+            <button type="button" class="btn-secondary" id="billing-manage" data-billing-action="manage">Manage billing</button>
+          </div>
+          <div class="status" id="billing-status" aria-live="polite"></div>
+        </div>
+
+      </div><!-- /dpanel-artifacts -->
     </section>
   </div>
 
@@ -465,16 +465,22 @@
       }
     }
 
-    // ---- Collapsible cards ----
-    document.querySelectorAll('.card-collapsible .card-toggle').forEach(function (btn) {
-      function toggle() {
-        var card = btn.closest('.card-collapsible');
-        var expanded = card.classList.toggle('expanded');
-        btn.setAttribute('aria-expanded', expanded ? 'true' : 'false');
-      }
-      btn.addEventListener('click', toggle);
-      btn.addEventListener('keydown', function (e) {
-        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); }
+    // ---- Dashboard tabs ----
+    var KEY_TAB = 'drophere_tab';
+    function showDashTab(name) {
+      document.querySelectorAll('.dash-tab').forEach(function (t) {
+        var active = t.dataset.dashTab === name;
+        t.classList.toggle('active', active);
+        t.setAttribute('aria-selected', active ? 'true' : 'false');
+      });
+      document.querySelectorAll('.dash-panel').forEach(function (p) {
+        p.classList.toggle('active', p.id === 'dpanel-' + name);
+      });
+    }
+    document.querySelectorAll('.dash-tab').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        showDashTab(btn.dataset.dashTab);
+        localStorage.setItem(KEY_TAB, btn.dataset.dashTab);
       });
     });
 
@@ -588,6 +594,7 @@
       window.scrollTo(0, 0);
       showView('dash');
       document.querySelectorAll('[aria-current="page"]').forEach(function(el){el.textContent='Account';});
+      showDashTab(localStorage.getItem(KEY_TAB) || 'setup');
       loadBillingStatus();
       loadArtifacts();
     }
