@@ -46,7 +46,7 @@
 </style>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    html { background: var(--dh-ink); }
+    html { background: var(--dh-ink); overflow-x: hidden; }
     body {
       min-height: 100vh;
       background: #000;
@@ -54,7 +54,6 @@
       font-family: var(--dh-font-sans);
       letter-spacing: 0;
       -webkit-font-smoothing: antialiased;
-      overflow-x: hidden;
     }
     a { color: inherit; }
     .arrow-field {
@@ -116,9 +115,58 @@
       background: rgba(255, 255, 255, .04);
     }
     .nav a[aria-current="page"] { color: var(--dh-lime); border-color: rgba(206,255,145,.24); background: rgba(206,255,145,.08); }
+    .menu-toggle {
+      display: none;
+      padding: 8px;
+      background: none;
+      border: 1px solid rgba(206,255,145,.24);
+      border-radius: 8px;
+      color: var(--dh-lime);
+      cursor: pointer;
+      line-height: 0;
+      flex-shrink: 0;
+    }
+    .nav-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.55);
+      z-index: 199;
+    }
+    .nav-backdrop.open { display: block; }
+    .nav-drawer {
+      position: fixed;
+      top: 0; right: 0;
+      width: 260px; height: 100dvh;
+      background: var(--dh-surface);
+      border-left: 1px solid rgba(206,255,145,.12);
+      padding: 20px 16px;
+      transform: translateX(100%);
+      transition: transform .22s cubic-bezier(.4,0,.2,1);
+      z-index: 200;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      overflow-y: auto;
+    }
+    .nav-drawer.open { transform: translateX(0); }
+    .nav-drawer-head { display: flex; align-items: center; justify-content: flex-end; margin-bottom: 12px; }
+    .nav-drawer-close {
+      background: none; border: none;
+      color: var(--dh-muted); cursor: pointer;
+      padding: 4px 8px; font-size: 1.2rem; line-height: 1; border-radius: 6px;
+    }
+    .nav-drawer-close:hover { color: var(--dh-text); }
+    .nav-drawer a {
+      display: block; padding: 11px 14px; border-radius: 8px;
+      font-size: .95rem; text-decoration: none;
+      color: var(--dh-muted); border: 1px solid transparent;
+    }
+    .nav-drawer a:hover { color: var(--dh-text); background: rgba(255,255,255,.04); }
+    .nav-drawer a[aria-current="page"] { color: var(--dh-lime); border-color: rgba(206,255,145,.24); background: rgba(206,255,145,.08); }
     .hero {
       width: min(1180px, calc(100% - 48px));
-      margin: auto;
+      margin: 0 auto; /* margin-top set by JS on load to lock in centering */
       padding: 72px 0 56px;
       display: grid;
       grid-template-columns: minmax(0, 1.05fr) minmax(360px, .95fr);
@@ -130,7 +178,7 @@
     }
     .lockup {
       display: block;
-      width: min(440px, 78vw);
+      width: min(380px, 78vw);
       height: auto;
       margin: 0 0 36px;
       filter: drop-shadow(0 18px 44px rgba(206, 255, 145, .12));
@@ -401,6 +449,7 @@
     }
     .footer-signup:hover { background: rgba(206, 255, 145, .14); }
     .bottom-band {
+      margin-top: auto;
       border-top: 1px solid rgba(206, 255, 145, .12);
       background: rgba(2, 4, 1, .7);
       backdrop-filter: blur(16px);
@@ -422,7 +471,8 @@
     }
     @media (max-width: 900px) {
       .topbar {
-        padding: 22px 0 0;
+        width: 100%;
+        padding: 22px 16px 0;
       }
       .nav {
         gap: 2px;
@@ -438,7 +488,7 @@
         padding-top: 0;
       }
       .lockup {
-        width: min(250px, 68vw);
+        width: 220px;
         margin-bottom: 24px;
       }
       h1 {
@@ -465,12 +515,8 @@
       .brand span {
         display: none;
       }
-      .nav a {
-        padding: 7px 8px;
-      }
-      .nav a:not(:last-child) {
-        display: none;
-      }
+      .nav { display: none; }
+      .menu-toggle { display: flex; align-items: center; justify-content: center; }
       h1 {
         font-size: 2.25rem;
       }
@@ -543,11 +589,14 @@
         <a href="./docs/">Docs</a>
         <a href="./account/">Sign in</a>
       </nav>
+      <button class="menu-toggle" id="menu-toggle" aria-label="Open menu" aria-expanded="false">
+        <svg width="18" height="14" viewBox="0 0 18 14" fill="none" aria-hidden="true"><rect width="18" height="2" rx="1" fill="currentColor"/><rect y="6" width="18" height="2" rx="1" fill="currentColor"/><rect y="12" width="18" height="2" rx="1" fill="currentColor"/></svg>
+      </button>
     </header>
 
     <main class="hero">
       <section class="hero-main" aria-labelledby="hero-title">
-        <img class="lockup" src="https://drophere.cc/brand/logo.svg" alt="drophere">
+        <img class="lockup" src="./brand/logo-lime.svg" alt="drophere">
         <h1 id="hero-title">Files to links.</h1>
         <p class="subtitle">
           Drop a file. Get a public link. <strong style="color:#fff;font-weight:550">No server needed.</strong>
@@ -590,7 +639,7 @@
             </div>
             <div class="next-steps">
               <div class="next-cmd"><code>drophere push ./report.pdf <span class="next-slug">→ your-slug.drophere.cc</span></code></div>
-              <div class="next-hint"><span class="darker">Or ask your agent to publish it.</span> <span class="lighter">It will give you a link.</span></div>
+              <div class="next-hint">Ask your agent to publish it. It will give you a link.</div>
             </div>
           </div>
           <div class="view" id="human-view" role="tabpanel" aria-labelledby="t-human">
@@ -798,6 +847,41 @@
       spawn(800);
       requestAnimationFrame(frame);
     })();
+    (function centerHero(){
+      var hero=document.querySelector('main.hero');
+      var topbar=document.querySelector('.topbar');
+      var band=document.querySelector('.bottom-band');
+      if(!hero||!topbar)return;
+      function compute(){
+        var avail=window.innerHeight-topbar.offsetHeight-(band?band.offsetHeight:60)-hero.offsetHeight;
+        hero.style.marginTop=Math.max(0,Math.round(avail/2))+'px';
+      }
+      compute();
+      var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(compute,120);});
+    })();
+    document.addEventListener('DOMContentLoaded',function(){
+      var t=document.getElementById('menu-toggle'),d=document.getElementById('nav-drawer'),b=document.getElementById('nav-backdrop'),c=document.getElementById('drawer-close');
+      if(!t)return;
+      function openDrawer(){d.classList.add('open');b.classList.add('open');t.setAttribute('aria-expanded','true');}
+      function closeDrawer(){d.classList.remove('open');b.classList.remove('open');t.setAttribute('aria-expanded','false');}
+      t.addEventListener('click',openDrawer);
+      c.addEventListener('click',closeDrawer);
+      b.addEventListener('click',closeDrawer);
+      document.addEventListener('keydown',function(e){if(e.key==='Escape')closeDrawer();});
+      if(localStorage.getItem('drophere_api_key')){
+        document.querySelectorAll('a[href$="/account"]').forEach(function(a){if(a.textContent.trim()==='Sign in')a.textContent='Account';});
+      }
+    });
   </script>
+  <div class="nav-backdrop" id="nav-backdrop"></div>
+  <nav class="nav-drawer" id="nav-drawer" aria-label="Mobile navigation">
+    <div class="nav-drawer-head">
+      <button class="nav-drawer-close" id="drawer-close" aria-label="Close menu">✕</button>
+    </div>
+    <a href="./" aria-current="page">Home</a>
+    <a href="./pricing/">Pricing</a>
+    <a href="./docs/">Docs</a>
+    <a href="./account/">Sign in</a>
+  </nav>
 </body>
 </html>

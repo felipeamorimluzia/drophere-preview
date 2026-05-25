@@ -44,10 +44,14 @@
 </style>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    html, body { min-height: 100%; background: var(--dh-ink); color: var(--dh-text); font-family: var(--dh-font-sans); }
-    body { -webkit-font-smoothing: antialiased; line-height: 1.5; }
+    html { min-height: 100%; background: var(--dh-ink); }
+    body { min-height: 100%; background: #000; color: var(--dh-text); font-family: var(--dh-font-sans); -webkit-font-smoothing: antialiased; line-height: 1.5; }
     a { color: inherit; }
-    .shell { min-height: 100vh; display: flex; flex-direction: column; }
+    .arrow-field { position: fixed; inset: 0; z-index: 0; width: 100%; height: 100%; pointer-events: none; }
+    .shell { min-height: 100vh; display: flex; flex-direction: column; position: relative; z-index: 1; }
+    @media (prefers-reduced-motion: reduce) {
+      .arrow-field { display: none; }
+    }
     .topbar { display: flex; align-items: center; justify-content: space-between; gap: 20px; width: min(1180px, calc(100% - 48px)); margin: 0 auto; padding: 28px 0 0; }
     .brand { display: inline-flex; align-items: center; gap: 10px; text-decoration: none; color: #fff; font-weight: 650; font-size: 1rem; }
     .brand img { width: 34px; height: 24px; object-fit: contain; }
@@ -55,10 +59,26 @@
     .nav a { text-decoration: none; border: 1px solid transparent; border-radius: 999px; padding: 7px 12px; line-height: 1; }
     .nav a:hover { color: var(--dh-text); border-color: var(--dh-line); background: rgba(255,255,255,.04); }
     .nav a[aria-current="page"] { color: var(--dh-lime); border-color: rgba(206,255,145,.24); background: rgba(206,255,145,.08); }
+    .menu-toggle { display:none; padding:8px; background:none; border:1px solid rgba(206,255,145,.24); border-radius:8px; color:var(--dh-lime); cursor:pointer; line-height:0; flex-shrink:0; }
+    .nav-backdrop { display:none; position:fixed; inset:0; background:rgba(0,0,0,.55); z-index:199; }
+    .nav-backdrop.open { display:block; }
+    .nav-drawer { position:fixed; top:0; right:0; width:260px; height:100dvh; background:var(--dh-surface); border-left:1px solid rgba(206,255,145,.12); padding:20px 16px; transform:translateX(100%); transition:transform .22s cubic-bezier(.4,0,.2,1); z-index:200; display:flex; flex-direction:column; gap:4px; overflow-y:auto; }
+    .nav-drawer.open { transform:translateX(0); }
+    .nav-drawer-head { display:flex; align-items:center; justify-content:flex-end; margin-bottom:12px; }
+    .nav-drawer-close { background:none; border:none; color:var(--dh-muted); cursor:pointer; padding:4px 8px; font-size:1.2rem; line-height:1; border-radius:6px; }
+    .nav-drawer-close:hover { color:var(--dh-text); }
+    .nav-drawer a { display:block; padding:11px 14px; border-radius:8px; font-size:.95rem; text-decoration:none; color:var(--dh-muted); border:1px solid transparent; }
+    .nav-drawer a:hover { color:var(--dh-text); background:rgba(255,255,255,.04); }
+    .nav-drawer a[aria-current="page"] { color:var(--dh-lime); border-color:rgba(206,255,145,.24); background:rgba(206,255,145,.08); }
+    @media (max-width: 640px) {
+      .nav { display:none; }
+      .menu-toggle { display:flex; align-items:center; justify-content:center; }
+      .brand span { display:none; }
+    }
     main { width: min(1180px, calc(100% - 48px)); margin: 0 auto; padding: 70px 0 84px; }
     .hero { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 48px; align-items: end; margin-bottom: 34px; }
     .eyebrow { color: var(--dh-lime); font-size: .78rem; text-transform: uppercase; letter-spacing: .08em; margin-bottom: 12px; }
-    h1 { color: #fff; font-size: clamp(2.35rem, 6vw, 4.8rem); line-height: .96; font-weight: 650; letter-spacing: 0; max-width: 760px; }
+    h1 { color: #fff; font-size: clamp(2.35rem, 6vw, 4.4rem); line-height: .96; font-weight: 650; letter-spacing: 0; max-width: 760px; }
     .lead { margin-top: 20px; color: var(--dh-muted); font-size: 1.13rem; max-width: 690px; }
     .anonymous { border: 1px solid var(--dh-line); border-radius: 8px; padding: 18px; background: rgba(255,255,255,.025); }
     .anonymous strong { display: block; color: #fff; font-size: 1rem; margin-bottom: 6px; }
@@ -111,6 +131,7 @@
   </style>
 </head>
 <body>
+  <canvas class="arrow-field" id="arrow-field" aria-hidden="true"></canvas>
   <div class="shell">
     <header class="topbar">
       <a class="brand" href="../" aria-label="drophere.cc">
@@ -123,6 +144,9 @@
         <a href="../docs/">Docs</a>
         <a href="../account/">Sign in</a>
       </nav>
+      <button class="menu-toggle" id="menu-toggle" aria-label="Open menu" aria-expanded="false">
+        <svg width="18" height="14" viewBox="0 0 18 14" fill="none" aria-hidden="true"><rect width="18" height="2" rx="1" fill="currentColor"/><rect y="6" width="18" height="2" rx="1" fill="currentColor"/><rect y="12" width="18" height="2" rx="1" fill="currentColor"/></svg>
+      </button>
     </header>
 
     <main>
@@ -260,6 +284,174 @@
       });
       markConfiguredPlans();
     })();
+    document.addEventListener('DOMContentLoaded',function(){
+      var t=document.getElementById('menu-toggle'),d=document.getElementById('nav-drawer'),b=document.getElementById('nav-backdrop'),c=document.getElementById('drawer-close');
+      if(!t)return;
+      function openDrawer(){d.classList.add('open');b.classList.add('open');t.setAttribute('aria-expanded','true');}
+      function closeDrawer(){d.classList.remove('open');b.classList.remove('open');t.setAttribute('aria-expanded','false');}
+      t.addEventListener('click',openDrawer);
+      c.addEventListener('click',closeDrawer);
+      b.addEventListener('click',closeDrawer);
+      document.addEventListener('keydown',function(e){if(e.key==='Escape')closeDrawer();});
+      if(localStorage.getItem('drophere_api_key')){
+        document.querySelectorAll('a[href$="/account"]').forEach(function(a){if(a.textContent.trim()==='Sign in')a.textContent='Account';});
+      }
+    });
+    (function renderArrowField() {
+      if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      var canvas = document.getElementById('arrow-field');
+      var ctx = canvas && canvas.getContext ? canvas.getContext('2d') : null;
+      if (!ctx) return;
+
+      var raw = [[27.13,14.6],[15,2.47],[2.87,14.6],[11.11,14.6],[11.11,27.53],[18.89,27.53],[18.89,14.6]];
+      var pts = raw.map(function(p) { return [p[0] - 15, p[1] - 15]; });
+      var arrows = [];
+      var nulls = [];
+      var lastSpawn = -Infinity;
+      var lastTime = 0;
+      var config = {
+        rows: 75,
+        cols: 100,
+        arrowSize: 4.5,
+        fadeRadius: 812,
+        fadeStrength: 0,
+        maxNulls: 5,
+        spawnInterval: 2600,
+        nullLifetime: 5500,
+        nullSpeed: 2,
+        smoothing: .47,
+        minScale: .1,
+        maxScale: 1.2
+      };
+
+      function resize() {
+        var dpr = Math.min(window.devicePixelRatio || 1, 2);
+        var w = window.innerWidth;
+        var h = window.innerHeight;
+        canvas.width = Math.floor(w * dpr);
+        canvas.height = Math.floor(h * dpr);
+        canvas.style.width = w + 'px';
+        canvas.style.height = h + 'px';
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        buildGrid(w, h);
+      }
+      function buildGrid(w, h) {
+        arrows = [];
+        var rows = config.rows;
+        var cols = config.cols;
+        var cw = w / cols;
+        var ch = h / rows;
+        for (var r = 0; r < rows; r += 1) {
+          for (var c = 0; c < cols; c += 1) {
+            arrows.push({ x: (c + .5) * cw, y: (r + .5) * ch, angle: -Math.PI * .5, scale: config.minScale, alpha: config.fadeStrength });
+          }
+        }
+      }
+      function spawn(now) {
+        var a = Math.random() * Math.PI * 2;
+        nulls.push({
+          x: Math.random() * window.innerWidth,
+          y: Math.random() * window.innerHeight,
+          vx: Math.cos(a) * config.nullSpeed,
+          vy: Math.sin(a) * config.nullSpeed,
+          born: now
+        });
+      }
+      function lerpAngle(cur, tgt, t) {
+        var d = tgt - cur;
+        d = d - Math.PI * 2 * Math.round(d / (Math.PI * 2));
+        return cur + d * t;
+      }
+      function update(now, dt) {
+        nulls = nulls.filter(function(n) { return now - n.born < config.nullLifetime; });
+        nulls.forEach(function(n) {
+          n.vx += (Math.random() - .5) * .15;
+          n.vy += (Math.random() - .5) * .15;
+          var spd = Math.sqrt(n.vx * n.vx + n.vy * n.vy) || 1;
+          if (spd > config.nullSpeed) {
+            n.vx = n.vx / spd * config.nullSpeed;
+            n.vy = n.vy / spd * config.nullSpeed;
+          }
+          n.x += n.vx * dt;
+          n.y += n.vy * dt;
+          if (n.x < 0) n.x += window.innerWidth;
+          if (n.x > window.innerWidth) n.x -= window.innerWidth;
+          if (n.y < 0) n.y += window.innerHeight;
+          if (n.y > window.innerHeight) n.y -= window.innerHeight;
+        });
+        if (nulls.length < config.maxNulls && now - lastSpawn >= config.spawnInterval) {
+          spawn(now);
+          lastSpawn = now;
+        }
+        var fadeR2 = config.fadeRadius * config.fadeRadius;
+        arrows.forEach(function(a) {
+          var wx = 0;
+          var wy = 0;
+          var total = 0;
+          var nearest = Infinity;
+          nulls.forEach(function(n) {
+            var age = (now - n.born) / config.nullLifetime;
+            var env = age < .12 ? age / .12 : age > .86 ? (1 - age) / .14 : 1;
+            var dx = n.x - a.x;
+            var dy = n.y - a.y;
+            var d2 = dx * dx + dy * dy;
+            if (d2 < nearest) nearest = d2;
+            if (d2 < fadeR2 && env > 0) {
+              var dist = Math.sqrt(d2) || 1;
+              var weight = (1 - dist / config.fadeRadius) * env;
+              wx += dx / dist * weight;
+              wy += dy / dist * weight;
+              total += weight;
+            }
+          });
+          if (total > .001) a.angle = lerpAngle(a.angle, Math.atan2(wx, -wy), config.smoothing);
+          var close = Math.max(0, 1 - Math.sqrt(nearest) / config.fadeRadius);
+          var targetAlpha = config.fadeStrength + (1 - config.fadeStrength) * close;
+          var targetScale = config.minScale + (config.maxScale - config.minScale) * close;
+          a.alpha += (targetAlpha - a.alpha) * .07;
+          a.scale += (targetScale - a.scale) * .07;
+        });
+      }
+      function drawArrow(a) {
+        if (a.alpha < .005) return;
+        ctx.save();
+        ctx.translate(a.x, a.y);
+        ctx.rotate(a.angle);
+        ctx.scale(config.arrowSize * a.scale / 15, config.arrowSize * a.scale / 15);
+        ctx.beginPath();
+        ctx.moveTo(pts[0][0], pts[0][1]);
+        for (var i = 1; i < pts.length; i += 1) ctx.lineTo(pts[i][0], pts[i][1]);
+        ctx.closePath();
+        ctx.fillStyle = 'rgba(48,61,32,' + a.alpha.toFixed(4) + ')';
+        ctx.fill();
+        ctx.restore();
+      }
+      function frame(now) {
+        if (!lastTime) lastTime = now;
+        var dt = Math.min(4, (now - lastTime) / 16.67);
+        lastTime = now;
+        ctx.fillStyle = '#000';
+        ctx.fillRect(0, 0, window.innerWidth, window.innerHeight);
+        update(now, dt);
+        arrows.forEach(drawArrow);
+        requestAnimationFrame(frame);
+      }
+      window.addEventListener('resize', resize);
+      resize();
+      spawn(0);
+      spawn(800);
+      requestAnimationFrame(frame);
+    })();
   </script>
+  <div class="nav-backdrop" id="nav-backdrop"></div>
+  <nav class="nav-drawer" id="nav-drawer" aria-label="Mobile navigation">
+    <div class="nav-drawer-head">
+      <button class="nav-drawer-close" id="drawer-close" aria-label="Close menu">✕</button>
+    </div>
+    <a href="../">Home</a>
+    <a href="../pricing/" aria-current="page">Pricing</a>
+    <a href="../docs/">Docs</a>
+    <a href="../account/">Sign in</a>
+  </nav>
 </body>
 </html>

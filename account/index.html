@@ -50,24 +50,39 @@
       --accent:var(--dh-lime); --link:#bfffa8; --error:#f87171;
       --warn-bg:#2a2410; --warn-bd:#5c4a14; --warn-fg:#facc15;
     }
-    html,body { background: var(--bg); }
+    html { background: var(--bg); }
     body {
-      color: var(--text); min-height: 100vh; padding: 0;
+      background: #000; color: var(--text); min-height: 100vh; padding: 0;
       font-family: var(--dh-font-sans);
       -webkit-font-smoothing: antialiased; line-height: 1.5;
+      display: flex; flex-direction: column;
     }
     a { color: var(--link); text-decoration: none; }
     a:hover { text-decoration: underline; }
-    .container { max-width: 1180px; margin: 0 auto; padding: 0 24px 40px; }
-    .page-header { display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; width: min(1180px, calc(100% - 48px)); margin: 0 auto; padding: 28px 0 32px; }
+    .arrow-field { position: fixed; inset: 0; z-index: 0; width: 100%; height: 100%; pointer-events: none; }
+    @media (prefers-reduced-motion: reduce) { .arrow-field { display: none; } }
+    .container { max-width: 1180px; margin: 0 auto; padding: 0 24px 40px; position: relative; z-index: 1; flex: 1; display: flex; flex-direction: column; justify-content: center; }
+    .container.is-dash { justify-content: flex-start; padding-top: 40px; }
+    .page-header { display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; width: min(1180px, calc(100% - 48px)); margin: 0 auto; padding: 28px 0 32px; position: relative; z-index: 1; }
     .brand { display:inline-flex; align-items:center; gap:10px; color:#fff; text-decoration:none; font-size:1rem; font-weight:650; }
     .brand img { width:34px; height:24px; object-fit:contain; }
     .brand span { font-size: 1rem; font-weight: 650; color:#fff; letter-spacing:0; }
-    .nav { display:inline-flex; align-items:center; gap:8px; color:var(--muted); font-size:.875rem; }
+    .nav { display:inline-flex; align-items:center; gap:10px; color:var(--muted); font-size:.875rem; }
     .nav a { color:var(--muted); text-decoration:none; border:1px solid transparent; border-radius:999px; padding:7px 12px; line-height:1; }
     .nav a:hover { color:var(--text); border-color:var(--border); background:rgba(255,255,255,.04); text-decoration:none; }
     .nav a[aria-current="page"] { color:var(--accent); border-color:rgba(206,255,145,.24); background:rgba(206,255,145,.08); }
     .nav a:focus-visible { outline:2px solid var(--link); outline-offset:2px; }
+    .menu-toggle { display:none; padding:8px; background:none; border:1px solid rgba(206,255,145,.24); border-radius:8px; color:var(--accent); cursor:pointer; line-height:0; flex-shrink:0; }
+    .nav-backdrop { display:none; position:fixed; inset:0; background:rgba(0,0,0,.55); z-index:199; }
+    .nav-backdrop.open { display:block; }
+    .nav-drawer { position:fixed; top:0; right:0; width:260px; height:100dvh; background:var(--card); border-left:1px solid var(--border); padding:20px 16px; transform:translateX(100%); transition:transform .22s cubic-bezier(.4,0,.2,1); z-index:200; display:flex; flex-direction:column; gap:4px; overflow-y:auto; }
+    .nav-drawer.open { transform:translateX(0); }
+    .nav-drawer-head { display:flex; align-items:center; justify-content:flex-end; margin-bottom:12px; }
+    .nav-drawer-close { background:none; border:none; color:var(--muted); cursor:pointer; padding:4px 8px; font-size:1.2rem; line-height:1; border-radius:6px; }
+    .nav-drawer-close:hover { color:var(--text); }
+    .nav-drawer a { display:block; padding:11px 14px; border-radius:8px; font-size:.95rem; text-decoration:none; color:var(--muted); border:1px solid transparent; }
+    .nav-drawer a:hover { color:var(--text); background:rgba(255,255,255,.04); text-decoration:none; }
+    .nav-drawer a[aria-current="page"] { color:var(--accent); border-color:rgba(206,255,145,.24); background:rgba(206,255,145,.08); }
     .card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 20px; margin-bottom: 20px; }
     .card h2 { font-size: .8125rem; font-weight: 500; color:#fff; margin-bottom:14px; text-transform:uppercase; letter-spacing:.04em; }
     .helper { font-size: .75rem; color: var(--dim); line-height: 1.6; margin-top: 10px; }
@@ -95,7 +110,7 @@
     .status.success { color: var(--accent); }
     .view { display: none; }
     .view.active { display: block; }
-    #view-email, #view-code { max-width: 840px; }
+    #view-email, #view-code { max-width: 480px; }
     .keybox { display:flex; align-items:center; gap:10px; background:#050803; border:1px solid var(--border); border-radius:6px; padding:10px 12px; }
     .keybox code { flex:1; font-size:.8125rem; color: var(--muted); overflow-x:auto; white-space:nowrap; }
     .copy-btn { background:none; border:none; color: var(--faint); cursor:pointer; padding:4px; border-radius:4px; flex-shrink:0; display:flex; align-items:center; justify-content:center; transition: color .15s; }
@@ -158,12 +173,21 @@
     .toast.error { border-color: var(--error); }
     .signed-in { display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; font-size:.75rem; color: var(--dim); margin-bottom: 20px; }
     .signed-in .email { color: var(--muted); }
+    .card-collapsible .card-body { display: none; }
+    .card-collapsible.expanded .card-body { display: block; }
+    .card-toggle { display:flex; align-items:center; justify-content:space-between; cursor:pointer; user-select:none; }
+    .card-toggle h2 { margin-bottom: 0; }
+    .card-toggle-arrow { font-size:.75rem; color:var(--dim); transition:transform .2s; flex-shrink:0; }
+    .card-collapsible.expanded .card-toggle-arrow { transform: rotate(180deg); }
+    @media (max-width: 640px) {
+      .nav { display:none; }
+      .menu-toggle { display:flex; align-items:center; justify-content:center; }
+      .brand span { display:none; }
+    }
     @media (max-width: 600px) {
       .container { padding: 0 16px 32px; }
       .card { padding: 16px; }
       .page-header { align-items:flex-start; width: 100%; padding: 20px 16px 24px; }
-      .nav { width:100%; }
-      .nav a { flex:1; text-align:center; }
       .mcp-tabs { flex-direction: column; border-bottom: none; }
       .mcp-tab { border:1px solid var(--border); border-radius:6px; margin-bottom:4px; }
       .pre-wrap { border-top:1px solid var(--border); border-radius:6px; }
@@ -183,10 +207,11 @@
   </style>
 </head>
 <body>
+  <canvas class="arrow-field" id="arrow-field" aria-hidden="true"></canvas>
   <header class="page-header">
     <a class="brand" href="../" aria-label="drophere.cc">
       <img src="https://drophere.cc/brand/symbol-lime.svg" alt="">
-      <span>account</span>
+      <span>drophere.cc</span>
     </a>
     <nav class="nav" aria-label="Primary">
       <a href="../">Home</a>
@@ -194,6 +219,9 @@
       <a href="../docs/">Docs</a>
       <a href="../account/" aria-current="page">Sign in</a>
     </nav>
+    <button class="menu-toggle" id="menu-toggle" aria-label="Open menu" aria-expanded="false">
+      <svg width="18" height="14" viewBox="0 0 18 14" fill="none" aria-hidden="true"><rect width="18" height="2" rx="1" fill="currentColor"/><rect y="6" width="18" height="2" rx="1" fill="currentColor"/><rect y="12" width="18" height="2" rx="1" fill="currentColor"/></svg>
+    </button>
   </header>
   <div class="container">
 
@@ -281,8 +309,12 @@
         <div class="status" id="billing-status" aria-live="polite"></div>
       </div>
 
-      <div class="card">
-        <h2>MCP setup</h2>
+      <div class="card card-collapsible" id="card-mcp">
+        <div class="card-toggle" role="button" tabindex="0" aria-expanded="false" aria-controls="body-mcp">
+          <h2>MCP setup</h2>
+          <span class="card-toggle-arrow" aria-hidden="true">▼</span>
+        </div>
+        <div class="card-body" id="body-mcp">
         <div class="mcp-tabs" role="tablist" id="mcp-tablist">
           <button type="button" class="mcp-tab active" role="tab" aria-selected="true" data-tab="claude">Claude Desktop</button>
           <button type="button" class="mcp-tab" role="tab" aria-selected="false" data-tab="chatgpt">ChatGPT</button>
@@ -322,10 +354,15 @@
           </div>
           <p class="helper">Then choose Streamable HTTP transport, point at the URL above, and add the Authorization header.</p>
         </div>
+        </div><!-- /card-body#body-mcp -->
       </div>
 
-      <div class="card">
-        <h2>Claim an artifact</h2>
+      <div class="card card-collapsible" id="card-claim">
+        <div class="card-toggle" role="button" tabindex="0" aria-expanded="false" aria-controls="body-claim">
+          <h2>Claim an artifact</h2>
+          <span class="card-toggle-arrow" aria-hidden="true">▼</span>
+        </div>
+        <div class="card-body" id="body-claim">
         <p class="helper" style="margin:0 0 14px;">Got a slug + claim token from a guest upload?</p>
         <form id="claim-form" novalidate>
           <div class="field">
@@ -342,6 +379,7 @@
           <div class="status" id="claim-status" aria-live="polite"></div>
         </form>
         <p class="helper">Lost your claim token? It cannot be recovered — contact support.</p>
+        </div><!-- /card-body#body-claim -->
       </div>
 
       <div class="card">
@@ -414,12 +452,29 @@
       Object.keys(ids).forEach(function (k) {
         var el = $(ids[k]); if (el) el.classList.toggle('active', k === name);
       });
-      setTimeout(function () {
-        var view = $(ids[name]); if (!view) return;
-        var f = view.querySelector('input, button[type="submit"]');
-        if (f) try { f.focus(); } catch (e) {}
-      }, 0);
+      var cont = document.querySelector('.container');
+      if (cont) cont.classList.toggle('is-dash', name === 'dash');
+      if (name !== 'dash') {
+        setTimeout(function () {
+          var view = $(ids[name]); if (!view) return;
+          var f = view.querySelector('input, button[type="submit"]');
+          if (f) try { f.focus(); } catch (e) {}
+        }, 0);
+      }
     }
+
+    // ---- Collapsible cards ----
+    document.querySelectorAll('.card-collapsible .card-toggle').forEach(function (btn) {
+      function toggle() {
+        var card = btn.closest('.card-collapsible');
+        var expanded = card.classList.toggle('expanded');
+        btn.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+      }
+      btn.addEventListener('click', toggle);
+      btn.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); }
+      });
+    });
 
     // ---- Toast ----
     var toastTimer = null;
@@ -438,8 +493,7 @@
     function handleUnauthenticated() {
       clearAuth();
       toast('Session expired. Please sign in again.', 'error');
-      var navLink = document.querySelector('.nav a[aria-current="page"]');
-      if (navLink) navLink.textContent = 'Sign in';
+      document.querySelectorAll('[aria-current="page"]').forEach(function(el){el.textContent='Sign in';});
       showView('email');
     }
 
@@ -529,10 +583,9 @@
       $('dash-email').textContent = email;
       $('apikey-display').textContent = apiKey;
       renderMcpSnippets(apiKey);
+      window.scrollTo(0, 0);
       showView('dash');
-      setTimeout(function() { window.scrollTo(0, 0); }, 50);
-      var navLink = document.querySelector('.nav a[aria-current="page"]');
-      if (navLink) navLink.textContent = 'Account';
+      document.querySelectorAll('[aria-current="page"]').forEach(function(el){el.textContent='Account';});
       loadBillingStatus();
       loadArtifacts();
     }
@@ -1404,7 +1457,172 @@
 
     // ---- Boot ----
     if (getApiKey()) enterDashboard(); else showView('email');
+    document.addEventListener('DOMContentLoaded',function(){
+      var t=document.getElementById('menu-toggle'),d=document.getElementById('nav-drawer'),b=document.getElementById('nav-backdrop'),c=document.getElementById('drawer-close');
+      if(!t)return;
+      function openDrawer(){d.classList.add('open');b.classList.add('open');t.setAttribute('aria-expanded','true');}
+      function closeDrawer(){d.classList.remove('open');b.classList.remove('open');t.setAttribute('aria-expanded','false');}
+      t.addEventListener('click',openDrawer);
+      c.addEventListener('click',closeDrawer);
+      b.addEventListener('click',closeDrawer);
+      document.addEventListener('keydown',function(e){if(e.key==='Escape')closeDrawer();});
+    });
+    (function renderArrowField() {
+      if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      var canvas = document.getElementById('arrow-field');
+      var ctx = canvas && canvas.getContext ? canvas.getContext('2d') : null;
+      if (!ctx) return;
+
+      var raw = [[27.13,14.6],[15,2.47],[2.87,14.6],[11.11,14.6],[11.11,27.53],[18.89,27.53],[18.89,14.6]];
+      var pts = raw.map(function(p) { return [p[0] - 15, p[1] - 15]; });
+      var arrows = [];
+      var nulls = [];
+      var lastSpawn = -Infinity;
+      var lastTime = 0;
+      var config = {
+        rows: 75,
+        cols: 100,
+        arrowSize: 4.5,
+        fadeRadius: 812,
+        fadeStrength: 0,
+        maxNulls: 5,
+        spawnInterval: 2600,
+        nullLifetime: 5500,
+        nullSpeed: 2,
+        smoothing: .47,
+        minScale: .1,
+        maxScale: 1.2
+      };
+
+      function resize() {
+        var dpr = Math.min(window.devicePixelRatio || 1, 2);
+        var w = window.innerWidth;
+        var h = window.innerHeight;
+        canvas.width = Math.floor(w * dpr);
+        canvas.height = Math.floor(h * dpr);
+        canvas.style.width = w + 'px';
+        canvas.style.height = h + 'px';
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        buildGrid(w, h);
+      }
+      function buildGrid(w, h) {
+        arrows = [];
+        var rows = config.rows;
+        var cols = config.cols;
+        var cw = w / cols;
+        var ch = h / rows;
+        for (var r = 0; r < rows; r += 1) {
+          for (var c = 0; c < cols; c += 1) {
+            arrows.push({ x: (c + .5) * cw, y: (r + .5) * ch, angle: -Math.PI * .5, scale: config.minScale, alpha: config.fadeStrength });
+          }
+        }
+      }
+      function spawn(now) {
+        var a = Math.random() * Math.PI * 2;
+        nulls.push({
+          x: Math.random() * window.innerWidth,
+          y: Math.random() * window.innerHeight,
+          vx: Math.cos(a) * config.nullSpeed,
+          vy: Math.sin(a) * config.nullSpeed,
+          born: now
+        });
+      }
+      function lerpAngle(cur, tgt, t) {
+        var d = tgt - cur;
+        d = d - Math.PI * 2 * Math.round(d / (Math.PI * 2));
+        return cur + d * t;
+      }
+      function update(now, dt) {
+        nulls = nulls.filter(function(n) { return now - n.born < config.nullLifetime; });
+        nulls.forEach(function(n) {
+          n.vx += (Math.random() - .5) * .15;
+          n.vy += (Math.random() - .5) * .15;
+          var spd = Math.sqrt(n.vx * n.vx + n.vy * n.vy) || 1;
+          if (spd > config.nullSpeed) {
+            n.vx = n.vx / spd * config.nullSpeed;
+            n.vy = n.vy / spd * config.nullSpeed;
+          }
+          n.x += n.vx * dt;
+          n.y += n.vy * dt;
+          if (n.x < 0) n.x += window.innerWidth;
+          if (n.x > window.innerWidth) n.x -= window.innerWidth;
+          if (n.y < 0) n.y += window.innerHeight;
+          if (n.y > window.innerHeight) n.y -= window.innerHeight;
+        });
+        if (nulls.length < config.maxNulls && now - lastSpawn >= config.spawnInterval) {
+          spawn(now);
+          lastSpawn = now;
+        }
+        var fadeR2 = config.fadeRadius * config.fadeRadius;
+        arrows.forEach(function(a) {
+          var wx = 0;
+          var wy = 0;
+          var total = 0;
+          var nearest = Infinity;
+          nulls.forEach(function(n) {
+            var age = (now - n.born) / config.nullLifetime;
+            var env = age < .12 ? age / .12 : age > .86 ? (1 - age) / .14 : 1;
+            var dx = n.x - a.x;
+            var dy = n.y - a.y;
+            var d2 = dx * dx + dy * dy;
+            if (d2 < nearest) nearest = d2;
+            if (d2 < fadeR2 && env > 0) {
+              var dist = Math.sqrt(d2) || 1;
+              var weight = (1 - dist / config.fadeRadius) * env;
+              wx += dx / dist * weight;
+              wy += dy / dist * weight;
+              total += weight;
+            }
+          });
+          if (total > .001) a.angle = lerpAngle(a.angle, Math.atan2(wx, -wy), config.smoothing);
+          var close = Math.max(0, 1 - Math.sqrt(nearest) / config.fadeRadius);
+          var targetAlpha = config.fadeStrength + (1 - config.fadeStrength) * close;
+          var targetScale = config.minScale + (config.maxScale - config.minScale) * close;
+          a.alpha += (targetAlpha - a.alpha) * .07;
+          a.scale += (targetScale - a.scale) * .07;
+        });
+      }
+      function drawArrow(a) {
+        if (a.alpha < .005) return;
+        ctx.save();
+        ctx.translate(a.x, a.y);
+        ctx.rotate(a.angle);
+        ctx.scale(config.arrowSize * a.scale / 15, config.arrowSize * a.scale / 15);
+        ctx.beginPath();
+        ctx.moveTo(pts[0][0], pts[0][1]);
+        for (var i = 1; i < pts.length; i += 1) ctx.lineTo(pts[i][0], pts[i][1]);
+        ctx.closePath();
+        ctx.fillStyle = 'rgba(48,61,32,' + a.alpha.toFixed(4) + ')';
+        ctx.fill();
+        ctx.restore();
+      }
+      function frame(now) {
+        if (!lastTime) lastTime = now;
+        var dt = Math.min(4, (now - lastTime) / 16.67);
+        lastTime = now;
+        ctx.fillStyle = '#000';
+        ctx.fillRect(0, 0, window.innerWidth, window.innerHeight);
+        update(now, dt);
+        arrows.forEach(drawArrow);
+        requestAnimationFrame(frame);
+      }
+      window.addEventListener('resize', resize);
+      resize();
+      spawn(0);
+      spawn(800);
+      requestAnimationFrame(frame);
+    })();
   })();
   </script>
+  <div class="nav-backdrop" id="nav-backdrop"></div>
+  <nav class="nav-drawer" id="nav-drawer" aria-label="Mobile navigation">
+    <div class="nav-drawer-head">
+      <button class="nav-drawer-close" id="drawer-close" aria-label="Close menu">✕</button>
+    </div>
+    <a href="../">Home</a>
+    <a href="../pricing/">Pricing</a>
+    <a href="../docs/">Docs</a>
+    <a href="../account/" aria-current="page">Sign in</a>
+  </nav>
 </body>
 </html>
