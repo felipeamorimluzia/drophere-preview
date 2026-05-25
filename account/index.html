@@ -429,7 +429,7 @@
               <div class="value" id="billing-quota">-</div>
             </div>
             <div class="billing-metric">
-              <div class="label">Secure/Collab</div>
+              <div class="label">Unlimited Pro</div>
               <div class="value" id="billing-secure">Locked</div>
             </div>
           </div>
@@ -450,7 +450,7 @@
             </div>
             <div class="upgrade-box">
               <div class="upgrade-box-head">
-                <span class="upgrade-box-name">Secure</span>
+                <span class="upgrade-box-name">Unlimited Pro</span>
                 <span class="upgrade-box-price"><strong>$9.99</strong> / mo</span>
               </div>
               <p class="upgrade-box-desc">Lock down who can see your artifacts. Built for client demos and private review.</p>
@@ -459,7 +459,7 @@
                 <li>Custom domains and service variables</li>
                 <li>Comments and collaborative review</li>
               </ul>
-              <button type="button" class="btn-secondary" id="billing-secure-upgrade" data-billing-action="upgrade" data-plan="secure" style="margin-top:auto;">Upgrade to Secure</button>
+              <button type="button" class="btn-secondary" id="billing-secure-upgrade" data-billing-action="upgrade" data-plan="secure" style="margin-top:auto;">Upgrade to Unlimited Pro</button>
             </div>
           </div>
 
@@ -800,7 +800,7 @@
       status.className = 'status';
     }
     function planLabel(plan) {
-      if (plan === 'secure') return 'Secure/Collab';
+      if (plan === 'secure') return 'Unlimited Pro';
       if (plan === 'unlimited') return 'Unlimited';
       if (plan === 'anonymous') return 'Anonymous';
       return 'Free Token';
@@ -816,8 +816,8 @@
         : String(usage.persistentArtifacts || 0) + ' / ' + String(usage.persistentArtifactLimit);
       $('billing-secure').textContent = data.features && data.features.secureAccessControls ? 'Unlocked' : 'Locked';
       $('billing-helper').textContent = data.features && data.features.secureAccessControls
-        ? 'Secure/Collab is active. Access control, passwords, service variables, custom domains, and collaboration tools are unlocked.'
-        : 'Free Token includes MCP access, unlimited 24-hour artifacts, and 10 persistent artifacts. Secure/Collab unlocks private review workflows.';
+        ? 'Unlimited Pro is active. Access control, passwords, service variables, custom domains, and collaboration tools are unlocked.'
+        : 'Free Token includes MCP access, unlimited 24-hour artifacts, and 10 persistent artifacts. Unlimited Pro unlocks private review workflows.';
       var grid = $('upgrade-grid');
       var manage = $('billing-manage');
       if (grid) grid.style.display = isPaid ? 'none' : '';
@@ -1208,7 +1208,7 @@
       viewSection.appendChild(viewTitle);
       var viewNote = document.createElement('p');
       viewNote.className = 'lock-note';
-      viewNote.innerHTML = '<strong>Secure feature.</strong> Restrict viewers by email or domain here. Secure/Collab unlocks private review workflows.';
+      viewNote.innerHTML = '<strong>Unlimited Pro feature.</strong> Restrict viewers by email or domain here. Unlimited Pro unlocks private review workflows.';
       viewSection.appendChild(viewNote);
 
       var visibility = document.createElement('select');
@@ -1244,7 +1244,7 @@
       commentSection.appendChild(commentTitle);
       var commentNote = document.createElement('p');
       commentNote.className = 'lock-note';
-      commentNote.innerHTML = '<strong>Collab feature.</strong> Invite reviewers and choose who can comment. Secure/Collab unlocks private review workflows.';
+      commentNote.innerHTML = '<strong>Unlimited Pro feature.</strong> Invite reviewers and choose who can comment. Unlimited Pro unlocks private review workflows.';
       commentSection.appendChild(commentNote);
 
       var enabledWrap = document.createElement('div');
