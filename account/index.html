@@ -110,6 +110,11 @@
     .view { display: none; }
     .view.active { display: block; }
     #view-email.active, #view-code.active { display: flex; align-items: center; flex: 1; }
+    .auth-inner { display:flex; align-items:center; gap:clamp(40px,8vw,96px); width:100%; }
+    .auth-inner > .card { flex-shrink:0; width:360px; margin-bottom:0; }
+    .auth-tagline { flex:1; min-width:0; }
+    .auth-tagline-head { font-size:clamp(1.625rem,3.5vw,2.375rem); font-weight:700; color:#fff; line-height:1.2; margin:0 0 14px; letter-spacing:-.02em; }
+    .auth-tagline-sub { font-size:.9375rem; color:var(--dim); line-height:1.65; margin:0; }
     .keybox { display:flex; align-items:center; gap:10px; background:#050803; border:1px solid var(--border); border-radius:6px; padding:10px 12px; }
     .keybox code { flex:1; font-size:.8125rem; color: var(--muted); overflow-x:auto; white-space:nowrap; }
     .copy-btn { background:none; border:none; color: var(--faint); cursor:pointer; padding:4px; border-radius:4px; flex-shrink:0; display:flex; align-items:center; justify-content:center; transition: color .15s; }
@@ -218,6 +223,8 @@
       .permissions-grid { grid-template-columns:1fr; }
       .billing-grid { grid-template-columns:1fr; }
       .upgrade-grid { grid-template-columns:1fr; }
+      .auth-tagline { display:none; }
+      .auth-inner > .card { width:100%; }
     }
   </style>
 </head>
@@ -241,37 +248,49 @@
   <div class="container">
 
     <section id="view-email" class="view" aria-labelledby="vh-email">
-      <div class="card">
-        <h2 id="vh-email">Sign in</h2>
-        <form id="email-form" novalidate>
-          <div class="field">
-            <label for="email-input">Email</label>
-            <input type="email" id="email-input" name="email" autocomplete="email" required placeholder="you@example.com">
-          </div>
-          <div class="btn-row">
-            <button type="submit" class="btn-primary" id="email-submit">Send code</button>
-          </div>
-          <div class="status" id="email-status" aria-live="polite"></div>
-        </form>
-        <p class="helper">We'll email you a one-time code. Same email later recovers the same API key.</p>
+      <div class="auth-inner">
+        <div class="card">
+          <h2 id="vh-email">Sign in</h2>
+          <form id="email-form" novalidate>
+            <div class="field">
+              <label for="email-input">Email</label>
+              <input type="email" id="email-input" name="email" autocomplete="email" required placeholder="you@example.com">
+            </div>
+            <div class="btn-row">
+              <button type="submit" class="btn-primary" id="email-submit">Send code</button>
+            </div>
+            <div class="status" id="email-status" aria-live="polite"></div>
+          </form>
+          <p class="helper">We'll email you a one-time code. Same email later recovers the same API key.</p>
+        </div>
+        <div class="auth-tagline" aria-hidden="true">
+          <p class="auth-tagline-head">Your email<br>is your key.</p>
+          <p class="auth-tagline-sub">No password to remember. Sign in once and your API key, artifacts, and settings are all here — same email, every time.</p>
+        </div>
       </div>
     </section>
 
     <section id="view-code" class="view" aria-labelledby="vh-code">
-      <div class="card">
-        <h2 id="vh-code">Verify code</h2>
-        <p class="helper" style="margin:0 0 12px;">We sent a code to <span id="code-email"></span>.</p>
-        <form id="code-form" novalidate>
-          <div class="field">
-            <label for="code-input">Code</label>
-            <input type="text" id="code-input" name="code" autocomplete="one-time-code" inputmode="text" placeholder="XXXX-XXXX" required>
-          </div>
-          <div class="btn-row">
-            <button type="submit" class="btn-primary" id="code-submit">Verify</button>
-            <button type="button" class="btn-link" id="back-to-email">Back to email</button>
-          </div>
-          <div class="status" id="code-status" aria-live="polite"></div>
-        </form>
+      <div class="auth-inner">
+        <div class="card">
+          <h2 id="vh-code">Verify code</h2>
+          <p class="helper" style="margin:0 0 12px;">We sent a code to <span id="code-email"></span>.</p>
+          <form id="code-form" novalidate>
+            <div class="field">
+              <label for="code-input">Code</label>
+              <input type="text" id="code-input" name="code" autocomplete="one-time-code" inputmode="text" placeholder="XXXX-XXXX" required>
+            </div>
+            <div class="btn-row">
+              <button type="submit" class="btn-primary" id="code-submit">Verify</button>
+              <button type="button" class="btn-link" id="back-to-email">Back to email</button>
+            </div>
+            <div class="status" id="code-status" aria-live="polite"></div>
+          </form>
+        </div>
+        <div class="auth-tagline" aria-hidden="true">
+          <p class="auth-tagline-head">Your email<br>is your key.</p>
+          <p class="auth-tagline-sub">No password to remember. Sign in once and your API key, artifacts, and settings are all here — same email, every time.</p>
+        </div>
       </div>
     </section>
 
